@@ -27,7 +27,7 @@ def starting(message):
         try:
             if not checkUserExistence(conn, chat_id):
                 createUser(conn,chat_id)
-                print('cis')
+                print('Created User table')
             else:
                 pass
             bot.delete_message(message.chat.id,message.id)
@@ -35,7 +35,9 @@ def starting(message):
             markup = types.ReplyKeyboardMarkup()
             itemAdd = types.KeyboardButton('Add Address')
             itemRemove = types.KeyboardButton('Remove Address')
+            itemInfo = types.KeyboardButton('info')
             markup.row(itemAdd,itemRemove)
+            markup.row(itemInfo)
             msg = bot.send_message(chat_id, "what can i do for you", reply_markup=markup)
             bot.register_next_step_handler(msg, handleResponse)
         except Exception as e:
@@ -43,4 +45,17 @@ def starting(message):
     else:
         print('qualcosa non va')
 
+def handleResponse(message):
+    chat_id=message.chat.id
+    try:
+        print('handleResponse function called')
+        if message.text == 'Add Address':
+            print('called add address from handle response')
+            addAddr(message)
+        elif message.text == "Remove Address":
+            print('called Remove Address from handle response')
+        elif message.text == 'info':
+            print('called info from handle response')
+        else:
+            print('i dunno wat that is')
 bot.polling()
