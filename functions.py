@@ -19,7 +19,11 @@ def checkUserExistence(conn,chatid):
 		print('Table doesn\'t exist')
 		return False
 
-
+def addAddrToDatabase(conn,database):
+    sql = 'UPDATE users Set addr=? WHERE chatid=?'
+    cur = conn.cursor()
+    cur.execute(sql,database)
+    conn.commit()
 
 def createConnection(database):
 	conn = None

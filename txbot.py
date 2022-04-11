@@ -14,7 +14,7 @@ user_started = {}
 conn = createConnection(database)
 
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text);'''
-
+print('Created User table')
 createTableSql(conn, createUserTable)
 
 @bot.message_handler(commands=['start'])
@@ -27,7 +27,7 @@ def starting(message):
         try:
             if not checkUserExistence(conn, chat_id):
                 createUser(conn,chat_id)
-                print('Created User table')
+                print('created chat id index for table')
             else:
                 pass
             bot.delete_message(message.chat.id,message.id)
@@ -45,17 +45,33 @@ def starting(message):
     else:
         print('qualcosa non va')
 
+def menu(chat_id):
+    markup = types.ReplyKeyboardMarkup()
+    itemAdd = types.KeyboardButton('Add Address')
+    itemRemove = types.KeyboardButton('Remove Address')
+    itemInfo = types.KeyboardButton('info')
+    markup.row(itemAdd,itemRemove)
+    markup.row(itemInfo)
+    msg = bot.send_message(chat_id, "what can i do for you", reply_markup=markup)
+    bot.register_next_step_handler(msg, handleResponse)
+
+
 def addAddr(message):
     chat_id = message.chat.id
     try:
         print('addAddr Started')
-        bot.delete_message(chat_id,message.id)
+        bot.delete_message(message.chat.id,message.id)
         if message.text == 'Back':
             print('User want to go back')
+            menu(chat_id)
         elif message.text[0:5] == 'terra':
             print('User want to monitor terra address')
+            addAddrToDatabase(conn,(message.text,chat_id))
+            print('User added to database')
         else:
             print('i dunno wat user want to do')
+            bot.send_message('Sorry, i can\'t understand your language') #TODO add github link page
+            menu(chat_id)
     except Exception as e:
         print(e)
 
