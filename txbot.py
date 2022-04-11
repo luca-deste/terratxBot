@@ -68,6 +68,8 @@ def addAddr(message):
             print('User want to monitor terra address')
             addAddrToDatabase(conn,(message.text,chat_id))
             print('User added to database')
+            bot.send_message(chat_id,'Perfect! now i will notify you when a transaction that regards your address will be transmitted. Pleas note that it might be a delay between the notification and the actual transaction on the blockchain.')
+            menu(chat_id)
         else:
             print('i dunno wat user want to do')
             bot.send_message('Sorry, i can\'t understand your language') #TODO add github link page
