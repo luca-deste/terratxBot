@@ -3,3 +3,4 @@ Pipfile
 Pipfile.lock
 appunti
 users.db
+test.py
