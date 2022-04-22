@@ -136,16 +136,15 @@ def infinityWalletUpdates():
                             addDateToDatabase(conn,(trxDict[chat_id]['timestamp'],chat_id))
                         else:
                             print('no new transactions for this address, chat id: ' + str(chat_id))
+                            pass
                     else:
                         print('this is probably not a valid terra address sorry' + str(chat_id))
                         pass
                 else:
-                    time.sleep(10)
                     pass
         else:
-            time.sleep(10)
             pass
-    time.sleep(120)
+        time.sleep(120)
 #___________________________
 infinityWalletUpdates()
 bot.polling()
