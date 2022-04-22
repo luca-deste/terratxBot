@@ -1,31 +1,30 @@
 import telebot
+from telebot import types
 import requests
 import datetime
-from config import token
 import sqlite3
 from sqlite3 import Error
 import time
-from functions import *
-from telebot import types
-import threading
 from datetime import datetime as dt
-
+import threading
+#___________________________
+from config import token
+from functions import *
+#___________________________
 url = "https://api.extraterrestrial.money/v1/txs/by_account?account="
 hashUrl = "https://terrasco.pe/mainnet/tx/"
 database = r'./users.db'
 bot = telebot.TeleBot(token, parse_mode=None)
 user_started = {}
 conn = createConnection(database)
-
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text,date timestamp);'''
-print('Created User table')
 createTableSql(conn, createUserTable)
-
+#___________________________
 def background(f):
     def backgrnd_func(*a, **kw):
         threading.Thread(target=f, args=a, kwargs=kw).start()
     return backgrnd_func
-
+#___________________________
 @bot.message_handler(commands=['start'])
 def starting(message):
     chat_id = message.chat.id
@@ -53,7 +52,7 @@ def starting(message):
             print(e)
     else:
         print('qualcosa non va')
-
+#___________________________
 def menu(chat_id):
     markup = types.ReplyKeyboardMarkup()
     itemAdd = types.KeyboardButton('Add Address')
@@ -63,8 +62,7 @@ def menu(chat_id):
     markup.row(itemInfo)
     msg = bot.send_message(chat_id, "what can i do for you", reply_markup=markup)
     bot.register_next_step_handler(msg, handleResponse)
-
-
+#___________________________
 def addAddr(message):
     chat_id = message.chat.id
     try:
@@ -86,7 +84,7 @@ def addAddr(message):
             menu(chat_id)
     except Exception as e:
         print(e)
-
+#___________________________
 def handleResponse(message):
     chat_id=message.chat.id
     try:
@@ -115,7 +113,7 @@ def handleResponse(message):
             menu(chat_id)
     except Exception as e:
         print(e)
-
+#___________________________
 @background
 def infinityWalletUpdates():
     while True:
@@ -172,6 +170,6 @@ def infinityWalletUpdates():
 
         #['txs'][0]['timestamp']
         #datetimeObj = datetime.strptime(noform, '%Y-%m-%dT%H:%M:%SZ')
-
+#___________________________
 infinityWalletUpdates()
 bot.polling()
