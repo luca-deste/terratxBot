@@ -35,7 +35,6 @@ def starting(message):
         try:
             if not checkUserExistence(conn, chat_id):
                 createUser(conn,chat_id)
-                print('created chat id index for table')
             else:
                 pass
             bot.delete_message(message.chat.id,message.id)
@@ -51,7 +50,7 @@ def starting(message):
         except Exception as e:
             print(e)
     else:
-        print('qualcosa non va')
+        print('qualcosa non va') #TODO: send a message to let user know something might be wrong
 #___________________________
 def menu(chat_id):
     markup = types.ReplyKeyboardMarkup()
@@ -66,20 +65,15 @@ def menu(chat_id):
 def addAddr(message):
     chat_id = message.chat.id
     try:
-        print('addAddr Started')
         bot.delete_message(message.chat.id,message.id)
         if message.text == 'Back':
-            print('User want to go back')
             menu(chat_id)
         elif message.text[0:5] == 'terra':
-            print('User want to monitor terra address')
             addAddrToDatabase(conn,(message.text,chat_id))
             addDateToDatabase(conn,(dt.now(),chat_id))
-            print('User added to database')
             bot.send_message(chat_id,'Perfect! now i will notify you when a transaction that regards your address will be transmitted. Pleas note that it might be a delay between the notification and the actual transaction on the blockchain.')
             menu(chat_id)
         else:
-            print('i dunno wat user want to do')
             bot.send_message('Sorry, i can\'t understand your language') #TODO add github link page
             menu(chat_id)
     except Exception as e:
@@ -88,7 +82,6 @@ def addAddr(message):
 def handleResponse(message):
     chat_id=message.chat.id
     try:
-        print('handleResponse function called')
         if message.text == 'Add Address':
             print('called add address from handle response')
             bot.delete_message(message.chat.id,message.id)
@@ -98,17 +91,13 @@ def handleResponse(message):
             msg = bot.send_message(chat_id, "Please, send me the address that you want to monitor. Please remember that for now you can only monitor one address at time.", reply_markup=markup)
             bot.register_next_step_handler(msg,addAddr)
         elif message.text == "Remove Address":
-            print('called Remove Address from handle response')
             bot.delete_message(message.chat.id,message.id)
             rmAddrFromDatabase(conn,(chat_id,))
-            print('User deleted')
             bot.send_message(chat_id,'You\'re account was succesfullly deleted.')
             menu(chat_id)
         elif message.text == 'info':
-            print('called info from handle response')
-            info(message)
+            info(message) #TODO: create info message
         else:
-            print('i dunno wat that is')
             bot.send_message(chat_id,'Sorry, i can\'t understand your language')
             menu(chat_id)
     except Exception as e:
@@ -121,7 +110,6 @@ def infinityWalletUpdates():
         try:
             chatlist = returnAllChatIds(conn)
         except TypeError:
-            print('there was a typeerror')
             time.sleep(10)
         if chatlist != []:
             for chat_id in chatlist:
@@ -129,25 +117,18 @@ def infinityWalletUpdates():
                 chat_id = chat_id[0]
                 trxDict[chat_id]={}
                 addr = returnAddress(conn,chat_id)
-                print(addr)
                 date = dt.strptime(returnDateFromId(conn,chat_id), '%Y-%m-%d %H:%M:%S')
-                print(date)
                 if addr:
                     trxList = requests.get(url + addr)
-                    print(trxList.status_code)
-                    if trxList.status_code == 200:
+                    if trxList.status_code == 200: #TODO: add possibility of status code 500 for server error
                         trxList = trxList.json()
-                        print(trxList['txs'][tx]['timestamp'])
                         timestamp = dt.strptime(trxList['txs'][tx]['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
-                        print(timestamp > date)
                         if timestamp > date:
-                            print('diocan')
                             trxDict[chat_id]['timestamp'] = timestamp
                             trxDict[chat_id]['txNum'] = []
                             while timestamp > date and tx < 9:
                                 trxDict[chat_id]['txNum'].insert(0,tx)
                                 tx = tx + 1
-                                print(tx)
                                 timestamp = dt.strptime(trxList['txs'][tx]['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
                             for transaction in trxDict[chat_id]['txNum']:
                                 TxHash = trxList["txs"][transaction]['txhash']
@@ -159,17 +140,12 @@ def infinityWalletUpdates():
                         print('this is probably not a valid terra address sorry' + str(chat_id))
                         pass
                 else:
-                    pass
                     time.sleep(10)
+                    pass
         else:
-            pass
             time.sleep(10)
-    time.sleep(10)
-
-
-
-        #['txs'][0]['timestamp']
-        #datetimeObj = datetime.strptime(noform, '%Y-%m-%dT%H:%M:%SZ')
+            pass
+    time.sleep(120)
 #___________________________
 infinityWalletUpdates()
 bot.polling()
