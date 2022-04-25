@@ -170,7 +170,7 @@ def infinityWalletUpdates():
                     pass
         else:
             pass
-        time.sleep(20)
+        time.sleep(120)
 #___________________________
 infinityWalletUpdates()
 bot.polling()
