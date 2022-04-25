@@ -1,6 +1,7 @@
-config.py
 Pipfile
 Pipfile.lock
 appunti
 users.db
 test.py
+Procfile
+config.py

@@ -8,10 +8,11 @@ import time
 from datetime import datetime as dt
 from datetime import timedelta
 import threading
+import os
 #___________________________
-from config import token
 from functions import *
 #___________________________
+token = os.getenv("TOKEN")
 url = "https://api.extraterrestrial.money/v1/txs/by_account?account="
 hashUrl = "https://terrasco.pe/mainnet/tx/"
 database = r'./users.db'
