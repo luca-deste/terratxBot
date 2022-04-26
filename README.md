@@ -7,7 +7,7 @@ If you prefer to host it by yourserlf you just need to create a file named confi
 ```
 token = "YOUR_TOKEN"
 ```
-In advance you should comment the first two functions (as you probably won't use the feature to make announcements).
+In advance you should comment some parts that are marked for you (as you probably won't use the feature to make announcements).
 
 
 TODO:
