@@ -11,6 +11,7 @@ import threading
 #___________________________
 from functions import *
 from config import token
+from config import command #Comment this line to use is by yourself
 #___________________________
 url = "https://api.extraterrestrial.money/v1/txs/by_account?account="
 hashUrl = "https://terrasco.pe/mainnet/tx/"
@@ -20,23 +21,6 @@ user_started = {}
 conn = createConnection(database)
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text,date timestamp);'''
 createTableSql(conn, createUserTable)
-#___________________________
-#Comment from here
-from config import command
-@bot.message_handler(commands=[command])
-def comunicate(message):
-    chat_id = message.chat.id
-    msg = bot.send_message(chat_id,'Please send me the message that you want to transmit.')
-    bot.register_next_step_handler(msg,comunication)
-#___________________________
-def comunication(message):
-    text = message.text
-    users = returnAllChatIds(conn)
-    for user in users:
-        print(user)
-        bot.send_message(user[0],text)
-    menu(message.chat.id)
-#To here
 #___________________________
 def background(f):
     def backgrnd_func(*a, **kw):
@@ -127,11 +111,32 @@ def handleResponse(message):
             menu(chat_id)
         elif message.text == 'info' or message.text == '/info':
             info(message)
+        #Comment from here to use it by yourself (remove # from the nex line)
+        #'''
+        elif message.text == command:
+            bot.delete_message(message.chat.id,message.id)
+            msg = bot.send_message(chat_id,'Please send me the message that you want to transmit.')
+            bot.register_next_step_handler(msg,comunication)
+        #'''
+        #Comment till here to use it by yourself (remove # from the next line)
         else:
             bot.send_message(chat_id,'Sorry, i can\'t understand your language. If you have a problem you can report it on my github page at: https://github.com/williDuckFoxx/terratxBot')
             menu(chat_id)
     except Exception as e:
         print(e)
+#___________________________
+#Comment from Here to use it by yourself (Just remove the # from the next line)
+#'''
+def comunication(message):
+    text = message.text
+    users = returnAllChatIds(conn)
+    bot.delete_message(message.chat.id,message.id)
+    for user in users:
+        print(user)
+        bot.send_message(user[0],text)
+    menu(message.chat.id)
+#'''
+#Comment till here to use it by yourself (Just remove the # from the previus line)
 #___________________________
 @background
 def infinityWalletUpdates():
