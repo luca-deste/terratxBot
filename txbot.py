@@ -8,7 +8,6 @@ import time
 from datetime import datetime as dt
 from datetime import timedelta
 import threading
-import os
 #___________________________
 from functions import *
 from config import token
@@ -187,7 +186,7 @@ def infinityWalletUpdates():
                     pass
         else:
             pass
-        time.sleep(200)
+        time.sleep(180)
 #___________________________
 infinityWalletUpdates()
 bot.polling()
