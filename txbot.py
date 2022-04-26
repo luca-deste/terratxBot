@@ -12,7 +12,6 @@ import os
 #___________________________
 from functions import *
 from config import token
-from config import command
 #___________________________
 url = "https://api.extraterrestrial.money/v1/txs/by_account?account="
 hashUrl = "https://terrasco.pe/mainnet/tx/"
@@ -22,6 +21,23 @@ user_started = {}
 conn = createConnection(database)
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text,date timestamp);'''
 createTableSql(conn, createUserTable)
+#___________________________
+#Comment from here
+from config import command
+@bot.message_handler(commands=[command])
+def comunicate(message):
+    chat_id = message.chat.id
+    msg = bot.send_message(chat_id,'Please send me the message that you want to transmit.')
+    bot.register_next_step_handler(msg,comunication)
+#___________________________
+def comunication(message):
+    text = message.text
+    users = returnAllChatIds(conn)
+    for user in users:
+        print(user)
+        bot.send_message(user[0],text)
+    menu(message.chat.id)
+#To here
 #___________________________
 def background(f):
     def backgrnd_func(*a, **kw):
@@ -54,20 +70,6 @@ def starting(message):
             print(e)
     else:
         print('qualcosa non va') 
-#___________________________
-@bot.message_handler(commands=[command])
-def comunicate(message):
-    chat_id = message.chat.id
-    msg = bot.send_message(chat_id,'Please send me the message that you want to transmit.')
-    bot.register_next_step_handler(msg,comunication)
-#___________________________
-def comunication(message):
-    text = message.text
-    users = returnAllChatIds(conn)
-    for user in users:
-        print(user)
-        bot.send_message(user[0],text)
-    menu(message.chat.id)
 #___________________________
 def menu(chat_id):
     markup = types.ReplyKeyboardMarkup()
