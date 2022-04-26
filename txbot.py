@@ -11,8 +11,9 @@ import threading
 import os
 #___________________________
 from functions import *
+from config import token
+from config import command
 #___________________________
-token = os.getenv("TOKEN")
 url = "https://api.extraterrestrial.money/v1/txs/by_account?account="
 hashUrl = "https://terrasco.pe/mainnet/tx/"
 database = r'./users.db'
@@ -53,6 +54,20 @@ def starting(message):
             print(e)
     else:
         print('qualcosa non va') 
+#___________________________
+@bot.message_handler(commands=[command])
+def comunicate(message):
+    chat_id = message.chat.id
+    msg = bot.send_message(chat_id,'Please send me the message that you want to transmit.')
+    bot.register_next_step_handler(msg,comunication)
+#___________________________
+def comunication(message):
+    text = message.text
+    users = returnAllChatIds(conn)
+    for user in users:
+        print(user)
+        bot.send_message(user[0],text)
+    menu(message.chat.id)
 #___________________________
 def menu(chat_id):
     markup = types.ReplyKeyboardMarkup()
@@ -170,7 +185,7 @@ def infinityWalletUpdates():
                     pass
         else:
             pass
-        time.sleep(120)
+        time.sleep(200)
 #___________________________
 infinityWalletUpdates()
 bot.polling()
