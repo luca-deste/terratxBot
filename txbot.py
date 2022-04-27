@@ -192,9 +192,9 @@ def infinityWalletUpdates():
                         pass
             else:
                 pass
-            except:
-                print('an error has occured')
-                pass
+        except error:
+            print('an error has occured + info: ' + error)
+            pass
         time.sleep(180)
 #___________________________
 infinityWalletUpdates()
