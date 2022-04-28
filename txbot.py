@@ -21,7 +21,7 @@ user_started = {}
 conn = createConnection(database)
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text,date timestamp);'''
 createTableSql(conn, createUserTable)
-terra = LCDClient(chain_id="columbus-5", url="https://lcd.terra.dev")
+terra = LCDClient(chain_id="columbus-5", url="https://bombay-lcd.terra.dev")
 #___________________________
 def background(f):
     def backgrnd_func(*a, **kw):
@@ -139,75 +139,36 @@ def comunication(message):
 #'''
 #Comment till here to use it by yourself (Just remove the # from the previus line)
 #___________________________
-'''@background
-def infinityWalletUpdates():
-    while True:
-        try:
-            trxDict = {}
-            try:
-                chatlist = returnAllChatIds(conn)
-            except TypeError:
-                time.sleep(10)
-            if chatlist != []:
-                for chat_id in chatlist:
-                    tx = 0
-                    chat_id = chat_id[0]
-                    trxDict[chat_id]={}
-                    addr = returnAddress(conn,chat_id)
-                    if returnDateFromId(conn,chat_id) != None:
-                        if len(str(returnDateFromId(conn,chat_id))) > 18:
-                            dateraw = str(returnDateFromId(conn,chat_id))[0:19]
-                        else:
-                            dateraw = str(returnDateFromId(conn,chat_id))
-                        date = dt.strptime(dateraw, '%Y-%m-%d %H:%M:%S')
-                        if addr:
-                            trxList = requests.get(url + addr)
-                            if trxList.status_code == 200:
-                                trxList = trxList.json()
-                                timestamp = dt.strptime(trxList['txs'][tx]['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
-                                print(str(timestamp) + " , " + str(date))
-                                if timestamp > date:
-                                    trxDict[chat_id]['timestamp'] = timestamp
-                                    trxDict[chat_id]['txNum'] = []
-                                    while timestamp > date and tx < 9:
-                                        trxDict[chat_id]['txNum'].insert(0,tx)
-                                        tx = tx + 1
-                                        timestamp = dt.strptime(trxList['txs'][tx]['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
-                                    for transaction in trxDict[chat_id]['txNum']:
-                                        TxHash = trxList["txs"][transaction]['txhash']
-                                        bot.send_message(chat_id,'I\'ve found a new transaction to your address!\n You can find more info about it here: '+hashUrl+TxHash)
-                                    addDateToDatabase(conn,(trxDict[chat_id]['timestamp'],chat_id))
-                                else:
-                                    print('no new transactions for this address, chat id: ' + str(chat_id))
-                                    pass
-                            elif trxList.status_code == 500:
-                                print('Server error')
-                                bot.send_message(chat_id,"I've got some problems trying to reach the server. I will try again in some minutes.")
-                                pass
-                            else:
-                                print('this is probably not a valid terra address sorry' + str(chat_id))
-                                pass
-                        else:
-                            pass
-                    else:
-                        pass
-            else:
-                pass
-        except:
-            print('an error has occured')
-            pass
-        time.sleep(180)'''
+
 @background
 def newWalletUpdates():
     while True:
         try:
+            starTime = dt.now()
+            print(starTime)
+            time.sleep(3)
             addresses = returnAllAddr(conn)
-            decoded_trx = []
+            print(addresses)
             encoded_trx = terra.tendermint.block_info()['block']['data']['txs']
             for trx in encoded_trx:
-                 decoded_trx.append(terra.tx.decode(trx).to_data())
+                print(trx)
+                for addr in addresses:
+                    print(addr[0] + ' from wallet update')
+                    if addr[0] in str(terra.tx.decode(trx).to_data()):
+                        print('''FOOOUND''')
+                        txHash = terra.tx.hash(terra.tx.decode(trx))
+                        print(txHash)
+                        chat_id = returnChatid(conn,addr[0])
+                        print(chat_id)
+                        bot.send_message(chat_id, 'I\'ve found a new transaction to your address!\n You can find more info about it here: ' + hashUrl + txHash)
+                    else:
+                        print('not this time') 
+            stopTime = dt.now()
+            print(stopTime)
+            print('exec time = ' + str(starTime-stopTime))
         except:
-            pass
+            time.sleep(2)
+            pass  
             
             
 
@@ -215,5 +176,5 @@ def newWalletUpdates():
 
 
 #___________________________
-infinityWalletUpdates()
+newWalletUpdates()
 bot.polling()

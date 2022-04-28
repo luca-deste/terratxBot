@@ -66,6 +66,14 @@ def returnAddress(conn,chatid): #USED
 	rows = cur.fetchone()[0]
 	return rows
 #___________________________
+#return the chat id that correspons to an address
+def returnChatid(conn,addr): #USED
+	cur = conn.cursor()
+	sql='select chatid from users where addr=?'
+	cur.execute(sql,(addr,))
+	rows = cur.fetchone()[0]
+	return rows
+#___________________________
 #returns all the addresses inside the users table
 #used to iterate trough the users
 def returnAllAddr(conn): #USED
@@ -74,7 +82,7 @@ def returnAllAddr(conn): #USED
 	sql ='select addr from users'
 	cur.execute(sql)
 	rows = cur.fetchall()
-	print(rows)
+	#print(rows)
 	return rows
 #___________________________
 #returns the timestamp based on the chat id
