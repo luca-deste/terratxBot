@@ -66,20 +66,16 @@ def returnAddress(conn,chatid): #USED
 	rows = cur.fetchone()[0]
 	return rows
 #___________________________
-#returns all the chat id's inside the users table
+#returns all the addresses inside the users table
 #used to iterate trough the users
-def returnAllChatIds(conn): #USED
+def returnAllAddr(conn): #USED
 	cur = conn.cursor()
 	arra = []
-	sql ='select chatid from users'
+	sql ='select addr from users'
 	cur.execute(sql)
 	rows = cur.fetchall()
 	print(rows)
 	return rows
-	'''for row in rows:
-		arra.append(row[0])
-		print(arra)
-		return arra'''
 #___________________________
 #returns the timestamp based on the chat id
 def returnDateFromId(conn,chatid): #USED

@@ -1,6 +1,5 @@
 import telebot
 from telebot import types
-import requests
 import datetime
 import sqlite3
 from sqlite3 import Error
@@ -8,12 +7,13 @@ import time
 from datetime import datetime as dt
 from datetime import timedelta
 import threading
+from terra_sdk.client.lcd import LCDClient
 #___________________________
 from functions import *
 from config import token
 from config import command #Comment this line to use is by yourself
 #___________________________
-url = "https://api.extraterrestrial.money/v1/txs/by_account?account="
+
 hashUrl = "https://terrasco.pe/mainnet/tx/"
 database = r'./users.db'
 bot = telebot.TeleBot(token, parse_mode=None)
@@ -21,6 +21,7 @@ user_started = {}
 conn = createConnection(database)
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text,date timestamp);'''
 createTableSql(conn, createUserTable)
+terra = LCDClient(chain_id="columbus-5", url="https://lcd.terra.dev")
 #___________________________
 def background(f):
     def backgrnd_func(*a, **kw):
@@ -138,7 +139,7 @@ def comunication(message):
 #'''
 #Comment till here to use it by yourself (Just remove the # from the previus line)
 #___________________________
-@background
+'''@background
 def infinityWalletUpdates():
     while True:
         try:
@@ -192,10 +193,27 @@ def infinityWalletUpdates():
                         pass
             else:
                 pass
-        except error:
-            print('an error has occured + info: ' + error)
+        except:
+            print('an error has occured')
             pass
-        time.sleep(180)
+        time.sleep(180)'''
+@background
+def newWalletUpdates():
+    while True:
+        try:
+            addresses = returnAllAddr(conn)
+            decoded_trx = []
+            encoded_trx = terra.tendermint.block_info()['block']['data']['txs']
+            for trx in encoded_trx:
+                 decoded_trx.append(terra.tx.decode(trx).to_data())
+        except:
+            pass
+            
+            
+
+
+
+
 #___________________________
 infinityWalletUpdates()
 bot.polling()
