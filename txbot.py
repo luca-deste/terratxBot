@@ -1,19 +1,19 @@
 import telebot
 from telebot import types
-import datetime
 import sqlite3
 from sqlite3 import Error
 import time
 from datetime import datetime as dt
-from datetime import timedelta
 import threading
 from terra_sdk.client.lcd import LCDClient
+import base64
+#from datetime import timedelta
+#import datetime
 #___________________________
 from functions import *
 from config import token
 from config import command #Comment this line to use is by yourself
 #___________________________
-
 hashUrl = "https://terrasco.pe/mainnet/tx/"
 database = r'./users.db'
 bot = telebot.TeleBot(token, parse_mode=None)
@@ -21,7 +21,7 @@ user_started = {}
 conn = createConnection(database)
 createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text);'''
 createTableSql(conn, createUserTable)
-terra = LCDClient(chain_id="columbus-5", url="https://bombay-lcd.terra.dev")
+terra = LCDClient(chain_id="columbus-5", url="https://lcd.terra.dev")
 #___________________________
 def background(f):
     def backgrnd_func(*a, **kw):
@@ -77,7 +77,6 @@ def addAddr(message):
             menu(chat_id)
         elif message.text[0:5] == 'terra':
             addAddrToDatabase(conn,(message.text,chat_id))
-            addDateToDatabase(conn,((dt.now() - timedelta(hours=2)),chat_id))
             bot.send_message(chat_id,'Perfect! now i will notify you when a transaction that regards your address will be transmitted. Pleas note that it might be a delay between the notification and the actual transaction on the blockchain.')
             menu(chat_id)
         else:
@@ -144,29 +143,45 @@ def newWalletUpdates():
     while True:
         try:
             starTime = dt.now()
-            print(starTime)
-            time.sleep(3)
+            #print(starTime)
             addresses = returnAllAddr(conn)
             print(addresses)
             encoded_trx = terra.tendermint.block_info()['block']['data']['txs']
             for trx in encoded_trx:
                 print(trx)
                 for addr in addresses:
-                    print(addr[0] + ' from wallet update')
-                    if addr[0] in str(terra.tx.decode(trx).to_data()):
-                        print('''FOOOUND''')
-                        txHash = terra.tx.hash(terra.tx.decode(trx))
-                        print(txHash)
-                        chat_id = returnChatid(conn,addr[0])
-                        print(chat_id)
-                        bot.send_message(chat_id, 'I\'ve found a new transaction to your address!\n You can find more info about it here: ' + hashUrl + txHash)
-                    else:
-                        print('not this time') 
+                    try:
+                        decoded = terra.tx.decode(trx).to_data()
+                        if addr[0] in str(decoded):
+                            if addr[0] != None:
+                                print(addr[0] + ' from wallet update')
+                                print('''FOOOUND''')
+                                txHash = terra.tx.hash(terra.tx.decode(trx))
+                                print(txHash)
+                                chat_id = returnChatid(conn,addr[0])
+                                print(chat_id)
+                                bot.send_message(chat_id, 'I\'ve found a new transaction to your address!\n You can find more info about it here: ' + hashUrl + txHash)
+                            else:
+                                print('address don\'t provided')
+                        else:
+                            print('not this time')
+                    except TypeError:
+                        print('msgMultiSend error? ')
+                        pass
+                    except AttributeError:
+                        print('Attribute error?')
+                        pass
+                    except:
+                        print('There is a generic error')
+                        pass
+                    
             stopTime = dt.now()
-            print(stopTime)
-            print('exec time = ' + str(starTime-stopTime))
-        except:
-            time.sleep(2)
+            #print(stopTime)
+            print('exec time = ' + str(stopTime-starTime))
+            time.sleep(5)
+        except Error as e:
+            print('An error as occured: ' + e)
+            time.sleep(5)
             pass  
 #___________________________
 newWalletUpdates()

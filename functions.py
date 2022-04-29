@@ -78,11 +78,16 @@ def returnChatid(conn,addr): #USED
 #used to iterate trough the users
 def returnAllAddr(conn): #USED
 	cur = conn.cursor()
-	arra = []
 	sql ='select addr from users'
 	cur.execute(sql)
 	rows = cur.fetchall()
 	#print(rows)
 	return rows
 #___________________________
-
+def returnAllChatIds(conn): #USED
+	cur = conn.cursor()
+	sql ='select chatid from users'
+	cur.execute(sql)
+	rows = cur.fetchall()
+	#print(rows)
+	return rows
