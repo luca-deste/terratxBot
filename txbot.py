@@ -19,7 +19,7 @@ database = r'./users.db'
 bot = telebot.TeleBot(token, parse_mode=None)
 user_started = {}
 conn = createConnection(database)
-createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text,date timestamp);'''
+createUserTable = '''CREATE TABLE IF NOT EXISTS users (chatid integer NOT NULL,addr text);'''
 createTableSql(conn, createUserTable)
 terra = LCDClient(chain_id="columbus-5", url="https://bombay-lcd.terra.dev")
 #___________________________
@@ -139,7 +139,6 @@ def comunication(message):
 #'''
 #Comment till here to use it by yourself (Just remove the # from the previus line)
 #___________________________
-
 @background
 def newWalletUpdates():
     while True:
@@ -169,12 +168,6 @@ def newWalletUpdates():
         except:
             time.sleep(2)
             pass  
-            
-            
-
-
-
-
 #___________________________
 newWalletUpdates()
 bot.polling()

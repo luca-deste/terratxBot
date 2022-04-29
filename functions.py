@@ -85,11 +85,4 @@ def returnAllAddr(conn): #USED
 	#print(rows)
 	return rows
 #___________________________
-#returns the timestamp based on the chat id
-def returnDateFromId(conn,chatid): #USED
-	cur = conn.cursor()
-	sql='select date from users where chatid=?'
-	cur.execute(sql,(chatid,))
-	rows = cur.fetchone()[0]
-	return rows
-#___________________________
+
