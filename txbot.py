@@ -1,3 +1,4 @@
+#IMPORT FROM MODULES
 import telebot
 from telebot import types
 import sqlite3
@@ -6,14 +7,13 @@ import time
 from datetime import datetime as dt
 import threading
 from terra_sdk.client.lcd import LCDClient
-import base64
-#from datetime import timedelta
-#import datetime
 #___________________________
+#IMPORT FROM FILES
 from functions import *
 from config import token
 from config import command #Comment this line to use is by yourself
 #___________________________
+#VARIABLE DEFINITION
 hashUrl = "https://terrasco.pe/mainnet/tx/"
 database = r'./users.db'
 bot = telebot.TeleBot(token, parse_mode=None)
@@ -32,9 +32,9 @@ def background(f):
 def starting(message):
     chat_id = message.chat.id
     if not chat_id in user_started:
-        user_started[chat_id] = True
-        time.sleep(0.5)
-        user_started.pop(chat_id)
+        user_started[chat_id] = True    #
+        time.sleep(0.5)                 # Prevents users from spamming /start and running multiple instances of the bot
+        user_started.pop(chat_id)       #
         try:
             if not checkUserExistence(conn, chat_id):
                 createUser(conn,chat_id)
@@ -82,14 +82,15 @@ def addAddr(message):
         else:
             bot.send_message('Sorry, i can\'t understand your language. If you have a problem you can report it on my github page at: https://github.com/williDuckFoxx/terratxBot')
             menu(chat_id)
-    except Exception as e:
+    except Error as e:
         print(e)
 #___________________________
 def info(message):
     chat_id = message.chat.id
     bot.delete_message(message.chat.id,message.id)
     bot.send_message(chat_id,"Terra transactions bot it\'s a bot developed to help users track their transactions on the terra blockchain.\nIf you want to follow along whit the project or ask for new features you can enter in the group chat (https://t.me/terratxbotgroup)")
-    bot.send_message(chat_id,"If you want to help the project you can go on the Github page on https://github.com/williDuckFoxx/terratxBot and leave a star. Or consider to make a small donation to the account")
+    bot.send_message(chat_id,"If you want to help the project you can go on the Github page on https://github.com/williDuckFoxx/terratxBot and leave a star.")
+    bot.send_message(chat_id,'Or consider to make a small donation to the account')
     bot.send_message(chat_id,"terra1qkyj360typg25plq3ffylwj5grm8wn3n2p53ha")
     menu(chat_id)
 #___________________________   
@@ -135,6 +136,7 @@ def comunication(message):
         print(user)
         bot.send_message(user[0],text)
     menu(message.chat.id)
+    #TODO use error exception cause if a user has stopped the bot the function will return an error and ruin the execution of the bot.
 #'''
 #Comment till here to use it by yourself (Just remove the # from the previus line)
 #___________________________
@@ -143,28 +145,21 @@ def newWalletUpdates():
     while True:
         try:
             starTime = dt.now()
-            #print(starTime)
             addresses = returnAllAddr(conn)
-            print(addresses)
             encoded_trx = terra.tendermint.block_info()['block']['data']['txs']
             for trx in encoded_trx:
-                print(trx)
                 for addr in addresses:
                     try:
                         decoded = terra.tx.decode(trx).to_data()
                         if addr[0] in str(decoded):
                             if addr[0] != None:
-                                print(addr[0] + ' from wallet update')
-                                print('''FOOOUND''')
                                 txHash = terra.tx.hash(terra.tx.decode(trx))
-                                print(txHash)
                                 chat_id = returnChatid(conn,addr[0])
-                                print(chat_id)
                                 bot.send_message(chat_id, 'I\'ve found a new transaction to your address!\n You can find more info about it here: ' + hashUrl + txHash)
                             else:
                                 print('address don\'t provided')
                         else:
-                            print('not this time')
+                            print('no transactions here')
                     except TypeError:
                         print('msgMultiSend error? ')
                         pass
